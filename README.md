@@ -1,2 +1,1 @@
-# cohnect
-A scriptable backend game server.
+# Cohnect (A declarative scriptable backend game server.)
