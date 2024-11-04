@@ -29,4 +29,5 @@ config.yml
 config.yaml
 
 # Compiled file
-./cohnect
+cohnect
+!*.go
