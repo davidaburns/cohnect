@@ -1,27 +1,23 @@
 name := "cohnect"
+package_import := "github.com/davidaburns/cohnect"
 commit := `git rev-parse --short HEAD`
 version := "0.0.1"
 build_time := `date -u +"%Y-%m-%dT%H:%M:%SZ"`
-build_path := "./build"
 
 build type="dev":
 	@echo "Building {{name}} ({{type}})..." ;
 	@if [ "{{type}}" = "dev" ]; then \
-		go build -ldflags "-X 'main.Name={{name}}' -X 'main.BuildTime={{build_time}}' -X 'main.Commit={{commit}}' -X 'main.BuildType={{type}}'" -o {{build_path}}/{{type}}/{{name}}; \
+		go build -ldflags "-X '{{package_import}}/config.name={{name}}' -X '{{package_import}}/config.buildTime={{build_time}}' -X '{{package_import}}/config.commit={{commit}}' -X '{{package_import}}/config.buildType={{type}}'" -o {{name}} ./cmd/{{name}}; \
 	elif [ "{{type}}" = "prod" ]; then \
-		go build -ldflags "-X 'main.Name={{name}}' -X 'main.BuildTime={{build_time}}' -X 'main.Commit={{commit}}' -X 'main.BuildType={{type}}' -s -w" -trimpath -o {{build_path}}/{{type}}/{{name}}; \
+		go build -ldflags "-X '{{package_import}}/config.name={{name}}' -X '{{package_import}}/config.buildTime={{build_time}}' -X '{{package_import}}/config.commit={{commit}}' -X '{{package_import}}/config.buildType={{type}}' -s -w" -trimpath -o {{name}} ./cmd/{{name}}; \
 	else \
 		echo "Unknown build type {{type}}, please use 'dev' or 'prod'"; \
 		exit 1; \
 	fi
 
-run:
-	@just build
-	./{{name}}
-
-version type="dev":
+run type +args="":
 	@just build {{type}}
-	@{{build_path}}/{{type}}/{{name}} --version
+	@./{{name}} {{args}}
 
 test:
 	@echo "Running Tests..."
@@ -33,4 +29,4 @@ lint:
 
 clean:
 	@echo "Cleaning..."
-	@rm -rf {{build_path}}
+	@rm ./{{name}}
