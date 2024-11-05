@@ -56,6 +56,12 @@ func (server *Server) Start(done chan bool) error {
 				}
 
 				server.Log.Infof("Recieved %d bytes from %s: %s", bytes, client, string(buffer[:bytes]))
+				packet, err := FromBytesBuffer(buffer)
+				if err != nil {
+					server.Log.Errorf("Error parsing packet: %s", err)
+				}
+				
+				server.Log.Infof("Parsed Packet: %v", packet)
 			}
 		}
 	}()
