@@ -60,7 +60,7 @@ func (server *Server) Start(done chan bool) error {
 					server.Log.Errorf("Error parsing packet: %s", err)
 					continue
 				}
-				
+			
 				op, err := OpFromPacket(packet)
 				if err != nil {
 					server.Log.Errorf("Error parsing op: %s", err)
