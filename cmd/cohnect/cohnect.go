@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/davidaburns/cohnect/config"
+	"github.com/davidaburns/cohnect/internal/cache"
 	"github.com/davidaburns/cohnect/internal/logger"
 	"github.com/davidaburns/cohnect/internal/server"
 )
@@ -25,7 +26,9 @@ func main() {
 	}
 
 	log := logger.CreateNew(serverConfig.Logger.Level, logger.ConsoleLog)
-	serverListener := server.CreateNew(serverConfig, log)
+	cache := cache.NewInMemoryCache()
+
+	serverListener := server.CreateNew(serverConfig, log, cache)
 
 	log.Infof("Starting: %s", build.ToString())
 	if err = serverListener.Start(done); err != nil {

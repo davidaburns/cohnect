@@ -5,18 +5,21 @@ import (
 	"net"
 
 	"github.com/davidaburns/cohnect/config"
+	"github.com/davidaburns/cohnect/internal/cache"
 	"go.uber.org/zap"
 )
 
 type Server struct {
 	Config *config.Config
 	Log *zap.SugaredLogger
+	Cache *cache.InMemoryCache
 }
 
-func CreateNew(config *config.Config, log *zap.SugaredLogger) *Server {
+func CreateNew(config *config.Config, log *zap.SugaredLogger, cache *cache.InMemoryCache) *Server {
 	return &Server {
 		Config: config,
 		Log: log,
+		Cache: cache,
 	}
 }
 
