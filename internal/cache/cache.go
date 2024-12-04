@@ -43,7 +43,7 @@ func (c *InMemoryCache) SetTTL(key string, value any, ttl time.Duration) {
 }
 
 func (c *InMemoryCache) Get(key string) (any, bool) {
-	c.mtx.RLock()
+	c.mtx.Lock()
 	defer c.mtx.Unlock()
 
 	value, ok := c.data[key];

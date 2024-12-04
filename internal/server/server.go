@@ -13,6 +13,7 @@ type Server struct {
 	Config *config.Config
 	Log *zap.SugaredLogger
 	Cache *cache.InMemoryCache
+	Connection *net.UDPConn
 }
 
 func CreateNew(config *config.Config, log *zap.SugaredLogger, cache *cache.InMemoryCache) *Server {
@@ -40,10 +41,13 @@ func (server *Server) Start(done chan bool) error {
 			return
 		}
 
-		defer conn.Close()
+		server.Connection = conn;
+
+		defer server.Connection.Close()
 		ready <- true
 
 		server.Log.Infof("UDP Server listening on %s:%d", server.Config.Server.Host, server.Config.Server.Port)
+		processor := NewPacketProcessor(server.Log, server.Cache, server.Connection)
 
 		buffer := make([]byte, 1024)
 		for {
@@ -52,7 +56,7 @@ func (server *Server) Start(done chan bool) error {
 				server.Log.Info("Shutting down UDP server...")
 				return
 			default:
-				bytes, client, err := conn.ReadFromUDP(buffer)
+				_, _, err := server.Connection.ReadFromUDP(buffer)
 				if err != nil {
 					server.Log.Errorf("Error reading from UDP connection: %s", err)
 					continue
@@ -63,8 +67,10 @@ func (server *Server) Start(done chan bool) error {
 					server.Log.Errorf("Error parsing packet: %s", err)
 					continue
 				}
-
-				server.Log.Infof("Client[%v] -> Packet[%v](%v): OP: %v BodyLength: %v: %v", client, packet.UUID, bytes, packet.Opcode.String(), packet.BodyLength, packet.Body)
+				
+				if err := processor.ProcessPacket(packet); err != nil {
+					server.Log.Errorf("Error processing packet: %s", err)
+				}
 			}
 		}
 	}()
