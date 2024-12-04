@@ -1,60 +1,54 @@
 package server
 
 import (
-	"encoding/binary"
+	"encoding/json"
 	"fmt"
 
+	"github.com/davidaburns/cohnect/internal/server/buffers"
 	"github.com/google/uuid"
 )
 
-const (
-	PACKET_ACCEPTED_VERSION uint8 = 1
-	PACKET_BUFFER_TOTAL uint16 = 1472;
-	PACKET_VERSION_SIZE uint16 = 1;
-	PACKET_UUID_SIZE uint16 = 16;
-	PACKET_OPCODE_SIZE uint16 = 2;
-	PACKET_BODY_LENGTH_SIZE uint16 = 2;
-	PACKET_HEADER_SIZE uint16 = PACKET_VERSION_SIZE + PACKET_UUID_SIZE + PACKET_OPCODE_SIZE + PACKET_BODY_LENGTH_SIZE;
-	PACKET_BODY_SIZE uint16 = PACKET_BUFFER_TOTAL - (PACKET_VERSION_SIZE + PACKET_UUID_SIZE + PACKET_OPCODE_SIZE + PACKET_BODY_LENGTH_SIZE);
-)
-
-type Packet struct {
-	Version uint8 			
-	UUID uuid.UUID			
-	Opcode Opcode
+type RequestPacket struct {
+	UUID uuid.UUID
+	Opcode buffers.RequestOp
 	BodyLength uint16
-	Body []byte
+	Body map[string]any
 }
 
-func FromBytesBuffer(data []byte) (*Packet, error) {
-	if len(data) < int(PACKET_HEADER_SIZE) || len(data) > int(PACKET_BUFFER_TOTAL) {
-		return nil, fmt.Errorf("invalid packet size: %d", len(data))
+func requestPacketFromBuffer(data []byte) (*RequestPacket, error) {
+	if !buffers.RequestPacketBufferHasIdentifier(data) {
+		return nil, fmt.Errorf("RequestPacket buffer has invalid identifier");
 	}
 
-	var packet *Packet = &Packet{}
-	var offset uint16 = 0
-
-	packet.Version = data[offset]
-	offset += 1
-
-	if packet.Version != PACKET_ACCEPTED_VERSION {
-		return nil, fmt.Errorf("invalid packet version: %d", packet.Version)
-	}
-
-	uuid, err := uuid.FromBytes(data[offset:offset+PACKET_UUID_SIZE])
+	buf := buffers.GetRootAsRequestPacket(data, 0)
+	uuid, err := uuid.FromBytes(buf.UuidBytes())
 	if err != nil {
-		return nil, fmt.Errorf("invalid UUID: %v", err)
+		return nil, fmt.Errorf("unable to parse uuid: %v", err)
 	}
 
-	packet.UUID=uuid
-	offset += PACKET_UUID_SIZE
+	opcode := buf.Opcode()
+	if !validRequestOpcode(opcode) {
+		return nil, fmt.Errorf("invalid request opcode: %v", opcode)
+	}
 
-	packet.Opcode = Opcode(binary.BigEndian.Uint16(data[offset:offset+PACKET_OPCODE_SIZE]))
-	offset += PACKET_OPCODE_SIZE
+	var body map[string]any;
+	if err := json.Unmarshal(buf.BodyBytes(), &body); err != nil {
+		return nil, fmt.Errorf("error while unmarshaling json from packet body: %v", err)
+	}
 
-	packet.BodyLength = binary.BigEndian.Uint16(data[offset:offset+PACKET_BODY_LENGTH_SIZE])
-	offset += PACKET_BODY_LENGTH_SIZE
+	return &RequestPacket{
+		UUID: uuid,
+		Opcode: opcode,
+		BodyLength: buf.Length(),
+		Body: body,
+	}, nil
+}
 
-	packet.Body = data[offset:offset+packet.BodyLength+1]
-	return packet, nil
+func validRequestOpcode(op buffers.RequestOp) bool {
+	switch op {
+	case buffers.RequestOpGET, buffers.RequestOpSET, buffers.RequestOpSET_CLIENT_TAGS, buffers.RequestOpEXECUTE, buffers.RequestOpSUBSCRIBE, buffers.RequestOpBROADCAST:
+		return true;
+	default:
+		return false;
+	}
 }

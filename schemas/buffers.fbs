@@ -1,0 +1,23 @@
+namespace buffers;
+
+attribute "length";
+attribute "max";
+
+enum RequestOp: uint16 {
+    GET = 0x00,
+    SET = 0x01,
+    SET_CLIENT_TAGS = 0x02,
+    EXECUTE = 0x03,
+    SUBSCRIBE = 0x04,
+    BROADCAST = 0x05
+}
+
+table RequestPacket {
+    uuid: [ubyte] (length: 16);
+    opcode: RequestOp;
+    length: uint16;
+    body: [ubyte] (max: 1452);
+}
+
+file_identifier "V001";
+root_type RequestPacket;

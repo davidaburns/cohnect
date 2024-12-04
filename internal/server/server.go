@@ -55,19 +55,13 @@ func (server *Server) Start(done chan bool) error {
 					continue
 				}
 
-				packet, err := FromBytesBuffer(buffer)
+				packet, err := requestPacketFromBuffer(buffer)
 				if err != nil {
 					server.Log.Errorf("Error parsing packet: %s", err)
 					continue
 				}
-			
-				op, err := OpFromPacket(packet)
-				if err != nil {
-					server.Log.Errorf("Error parsing op: %s", err)
-					continue
-				}
 
-				server.Log.Infof("Client[%v] -> Packet[%v](%v): v%v OP: %v BodyLength: %v: %v", client, packet.UUID, bytes, packet.Version, OpToString(packet.Opcode), packet.BodyLength, op.Body)
+				server.Log.Infof("Client[%v] -> Packet[%v](%v): OP: %v BodyLength: %v: %v", client, packet.UUID, bytes, packet.Opcode.String(), packet.BodyLength, packet.Body)
 			}
 		}
 	}()
