@@ -56,18 +56,18 @@ func (server *Server) Start(done chan bool) error {
 				server.Log.Info("Shutting down UDP server...")
 				return
 			default:
-				_, _, err := server.Connection.ReadFromUDP(buffer)
+				_, addr, err := server.Connection.ReadFromUDP(buffer)
 				if err != nil {
 					server.Log.Errorf("Error reading from UDP connection: %s", err)
 					continue
 				}
 
-				packet, err := requestPacketFromBuffer(buffer)
+				packet, err := requestPacketFromBuffer(buffer, addr)
 				if err != nil {
 					server.Log.Errorf("Error parsing packet: %s", err)
 					continue
 				}
-				
+
 				if err := processor.ProcessPacket(packet); err != nil {
 					server.Log.Errorf("Error processing packet: %s", err)
 				}

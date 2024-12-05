@@ -7,7 +7,7 @@ import (
 )
 
 type RequestPacketT struct {
-	Uuid []byte `json:"uuid"`
+	CorrelationId []byte `json:"correlation_id"`
 	Opcode RequestOp `json:"opcode"`
 	Length uint16 `json:"length"`
 	Body []byte `json:"body"`
@@ -17,16 +17,16 @@ func (t *RequestPacketT) Pack(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 	if t == nil {
 		return 0
 	}
-	uuidOffset := flatbuffers.UOffsetT(0)
-	if t.Uuid != nil {
-		uuidOffset = builder.CreateByteString(t.Uuid)
+	correlationIdOffset := flatbuffers.UOffsetT(0)
+	if t.CorrelationId != nil {
+		correlationIdOffset = builder.CreateByteString(t.CorrelationId)
 	}
 	bodyOffset := flatbuffers.UOffsetT(0)
 	if t.Body != nil {
 		bodyOffset = builder.CreateByteString(t.Body)
 	}
 	RequestPacketStart(builder)
-	RequestPacketAddUuid(builder, uuidOffset)
+	RequestPacketAddCorrelationId(builder, correlationIdOffset)
 	RequestPacketAddOpcode(builder, t.Opcode)
 	RequestPacketAddLength(builder, t.Length)
 	RequestPacketAddBody(builder, bodyOffset)
@@ -34,7 +34,7 @@ func (t *RequestPacketT) Pack(builder *flatbuffers.Builder) flatbuffers.UOffsetT
 }
 
 func (rcv *RequestPacket) UnPackTo(t *RequestPacketT) {
-	t.Uuid = rcv.UuidBytes()
+	t.CorrelationId = rcv.CorrelationIdBytes()
 	t.Opcode = rcv.Opcode()
 	t.Length = rcv.Length()
 	t.Body = rcv.BodyBytes()
@@ -96,7 +96,7 @@ func (rcv *RequestPacket) Table() flatbuffers.Table {
 	return rcv._tab
 }
 
-func (rcv *RequestPacket) Uuid(j int) byte {
+func (rcv *RequestPacket) CorrelationId(j int) byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		a := rcv._tab.Vector(o)
@@ -105,7 +105,7 @@ func (rcv *RequestPacket) Uuid(j int) byte {
 	return 0
 }
 
-func (rcv *RequestPacket) UuidLength() int {
+func (rcv *RequestPacket) CorrelationIdLength() int {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		return rcv._tab.VectorLen(o)
@@ -113,7 +113,7 @@ func (rcv *RequestPacket) UuidLength() int {
 	return 0
 }
 
-func (rcv *RequestPacket) UuidBytes() []byte {
+func (rcv *RequestPacket) CorrelationIdBytes() []byte {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		return rcv._tab.ByteVector(o + rcv._tab.Pos)
@@ -121,7 +121,7 @@ func (rcv *RequestPacket) UuidBytes() []byte {
 	return nil
 }
 
-func (rcv *RequestPacket) MutateUuid(j int, n byte) bool {
+func (rcv *RequestPacket) MutateCorrelationId(j int, n byte) bool {
 	o := flatbuffers.UOffsetT(rcv._tab.Offset(4))
 	if o != 0 {
 		a := rcv._tab.Vector(o)
@@ -191,10 +191,10 @@ func (rcv *RequestPacket) MutateBody(j int, n byte) bool {
 func RequestPacketStart(builder *flatbuffers.Builder) {
 	builder.StartObject(4)
 }
-func RequestPacketAddUuid(builder *flatbuffers.Builder, uuid flatbuffers.UOffsetT) {
-	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(uuid), 0)
+func RequestPacketAddCorrelationId(builder *flatbuffers.Builder, correlationId flatbuffers.UOffsetT) {
+	builder.PrependUOffsetTSlot(0, flatbuffers.UOffsetT(correlationId), 0)
 }
-func RequestPacketStartUuidVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
+func RequestPacketStartCorrelationIdVector(builder *flatbuffers.Builder, numElems int) flatbuffers.UOffsetT {
 	return builder.StartVector(1, numElems, 1)
 }
 func RequestPacketAddOpcode(builder *flatbuffers.Builder, opcode RequestOp) {

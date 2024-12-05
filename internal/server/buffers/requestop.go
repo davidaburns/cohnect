@@ -7,30 +7,27 @@ import "strconv"
 type RequestOp uint16
 
 const (
-	RequestOpGET             RequestOp = 0
-	RequestOpSET             RequestOp = 1
-	RequestOpSET_CLIENT_TAGS RequestOp = 2
-	RequestOpEXECUTE         RequestOp = 3
-	RequestOpSUBSCRIBE       RequestOp = 4
-	RequestOpBROADCAST       RequestOp = 5
+	RequestOpPING                 RequestOp = 0
+	RequestOpSESSION_START        RequestOp = 1
+	RequestOpSESSION_END          RequestOp = 2
+	RequestOpEVENT                RequestOp = 3
+	RequestOpREGISTER_CLIENT_TAGS RequestOp = 4
 )
 
 var EnumNamesRequestOp = map[RequestOp]string{
-	RequestOpGET:             "GET",
-	RequestOpSET:             "SET",
-	RequestOpSET_CLIENT_TAGS: "SET_CLIENT_TAGS",
-	RequestOpEXECUTE:         "EXECUTE",
-	RequestOpSUBSCRIBE:       "SUBSCRIBE",
-	RequestOpBROADCAST:       "BROADCAST",
+	RequestOpPING:                 "PING",
+	RequestOpSESSION_START:        "SESSION_START",
+	RequestOpSESSION_END:          "SESSION_END",
+	RequestOpEVENT:                "EVENT",
+	RequestOpREGISTER_CLIENT_TAGS: "REGISTER_CLIENT_TAGS",
 }
 
 var EnumValuesRequestOp = map[string]RequestOp{
-	"GET":             RequestOpGET,
-	"SET":             RequestOpSET,
-	"SET_CLIENT_TAGS": RequestOpSET_CLIENT_TAGS,
-	"EXECUTE":         RequestOpEXECUTE,
-	"SUBSCRIBE":       RequestOpSUBSCRIBE,
-	"BROADCAST":       RequestOpBROADCAST,
+	"PING":                 RequestOpPING,
+	"SESSION_START":        RequestOpSESSION_START,
+	"SESSION_END":          RequestOpSESSION_END,
+	"EVENT":                RequestOpEVENT,
+	"REGISTER_CLIENT_TAGS": RequestOpREGISTER_CLIENT_TAGS,
 }
 
 func (v RequestOp) String() string {

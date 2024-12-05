@@ -3,25 +3,27 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 
 	"github.com/davidaburns/cohnect/internal/server/buffers"
 	"github.com/google/uuid"
 )
 
 type RequestPacket struct {
-	UUID uuid.UUID
+	CorrelationId uuid.UUID
 	Opcode buffers.RequestOp
 	BodyLength uint16
 	Body map[string]any
+	ClientAddr *net.UDPAddr
 }
 
-func requestPacketFromBuffer(data []byte) (*RequestPacket, error) {
+func requestPacketFromBuffer(data []byte, addr *net.UDPAddr) (*RequestPacket, error) {
 	if !buffers.RequestPacketBufferHasIdentifier(data) {
 		return nil, fmt.Errorf("RequestPacket buffer has invalid identifier");
 	}
 
 	buf := buffers.GetRootAsRequestPacket(data, 0)
-	uuid, err := uuid.FromBytes(buf.UuidBytes())
+	uuid, err := uuid.FromBytes(buf.CorrelationIdBytes())
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse uuid: %v", err)
 	}
@@ -37,16 +39,17 @@ func requestPacketFromBuffer(data []byte) (*RequestPacket, error) {
 	}
 
 	return &RequestPacket{
-		UUID: uuid,
+		CorrelationId: uuid,
 		Opcode: opcode,
 		BodyLength: buf.Length(),
 		Body: body,
+		ClientAddr: addr,
 	}, nil
 }
 
 func validRequestOpcode(op buffers.RequestOp) bool {
 	switch op {
-	case buffers.RequestOpGET, buffers.RequestOpSET, buffers.RequestOpSET_CLIENT_TAGS, buffers.RequestOpEXECUTE, buffers.RequestOpSUBSCRIBE, buffers.RequestOpBROADCAST:
+	case buffers.RequestOpPING, buffers.RequestOpSESSION_START, buffers.RequestOpSESSION_END, buffers.RequestOpEVENT, buffers.RequestOpREGISTER_CLIENT_TAGS:
 		return true;
 	default:
 		return false;

@@ -4,17 +4,34 @@ attribute "length";
 attribute "max";
 
 enum RequestOp: uint16 {
-    GET = 0x00,
-    SET = 0x01,
-    SET_CLIENT_TAGS = 0x02,
-    EXECUTE = 0x03,
-    SUBSCRIBE = 0x04,
-    BROADCAST = 0x05
+    PING = 0x00,
+    SESSION_START = 0x01,
+    SESSION_END = 0x02,
+    EVENT = 0x03,
+    REGISTER_CLIENT_TAGS = 0x04
+}
+
+enum ClientMessageType: uint16 {
+    PING_SUCCESS = 0x00,
+    SESSION_START_SUCCESS = 0x01,
+    SESSION_START_FAILED = 0x02,
+    SESSION_END_SUCCESS = 0x03,
+    SESSION_END_FAILED = 0x04,
+    EVENT_SUCCESS = 0x05,
+    EVENT_FAILED = 0x06,
+    NOTIFICATION = 0x07
 }
 
 table RequestPacket {
-    uuid: [ubyte] (length: 16);
+    correlation_id: [ubyte] (length: 16);
     opcode: RequestOp;
+    length: uint16;
+    body: [ubyte] (max: 1452);
+}
+
+table ClientMessagePacket {
+    correlation_id: [ubyte] (length: 16);
+    type: ClientMessageType;
     length: uint16;
     body: [ubyte] (max: 1452);
 }
