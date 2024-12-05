@@ -62,13 +62,13 @@ func (server *Server) Start(done chan bool) error {
 					continue
 				}
 
-				packet, err := requestPacketFromBuffer(buffer, addr)
+				packet, err := NewPacketFromBuffer(buffer, addr)
 				if err != nil {
 					server.Log.Errorf("Error parsing packet: %s", err)
 					continue
 				}
 
-				if err := processor.ProcessPacket(packet); err != nil {
+				if err := processor.Process(packet); err != nil {
 					server.Log.Errorf("Error processing packet: %s", err)
 				}
 			}
