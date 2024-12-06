@@ -46,8 +46,8 @@ func (server *Server) Start(done chan bool) error {
 		defer server.Connection.Close()
 		ready <- true
 
-		server.Log.Infof("UDP Server listening on %s:%d", server.Config.Server.Host, server.Config.Server.Port)
-		processor := NewPacketProcessor(server.Log, server.Cache, server.Connection)
+		server.Log.Infof("UDP Server listening on %s:%d, client responses on %d", server.Config.Server.Host, server.Config.Server.Port, server.Config.Client.ListeningPort)
+		processor := NewRequestProcessor(server.Log, server.Cache, server.Connection)
 
 		buffer := make([]byte, 1024)
 		for {
@@ -62,7 +62,7 @@ func (server *Server) Start(done chan bool) error {
 					continue
 				}
 
-				packet, err := NewPacketFromBuffer(buffer, addr)
+				packet, err := NewRequestFromBuffer(buffer, addr, server.Config.Client.ListeningPort)
 				if err != nil {
 					server.Log.Errorf("Error parsing packet: %s", err)
 					continue

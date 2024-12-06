@@ -47,6 +47,9 @@ type Config struct {
 	Logger struct {
 		Level string `mapstructure:"level"`
 	} `mapstructure:"logger"`
+	Client struct {
+		ListeningPort int `mapstructure:"listeningPort"`
+	} `mapstructure:"client"`
 }
 
 func LoadConfigFile(file string) (*Config, error) {
